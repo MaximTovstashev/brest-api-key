@@ -12,6 +12,8 @@ var headersDefaults = {
     signature: 'x-brest-signature'
 };
 
+var ONE_HOUR = 60 * 60 * 1000;
+
 /**
  * We don't check nonce if no outer callback is used at this point
  * @param nonce
@@ -52,7 +54,9 @@ var BrestAPIkey =
             BrestAPIkey.checkNonce(req.headers[headers.nonce], function(err, nonce_ok){
                 if (err) return callback(err);
                 if (nonce_ok) {
-                    var ln = String.fromCharCode(10); //Line feed code
+                    var timeDiff = (new Date()) - req.headers[headers.timestamp];
+                    if (timeDiff > ONE_HOUR || timeDiff < 0) return callback({error: 'Your client has failed to follow Shadow Proclamation Temporal Regulations'});
+                    var ln = '|'; //Line feed code
                     var url_parts = url.parse(req.url, true);
 
                     var queryString = [];
@@ -67,8 +71,7 @@ var BrestAPIkey =
                        req.headers[headers.timestamp] + ln +
                        req.method + ln +
                        url_parts.pathname + ln +
-                       canonicalQuery + ln +
-                       crypto.createHash('sha256').update(req.raw || "").digest('hex');
+                       canonicalQuery + ln;
 
                     if (BrestAPIkey.keys[req.headers[headers.credential]]) {
                        var signature = crypto.createHmac("sha256", BrestAPIkey.keys[req.headers[headers.credential]]).update(authenticationScheme).digest("hex");
