@@ -61,7 +61,9 @@ var BrestAPIkey =
 
                     var queryString = [];
                     _.each(url_parts.query, function(value, key){
-                       queryString.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                        if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
+                            queryString.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                        }
                     });
                     var canonicalQuery = queryString.join('&');
 

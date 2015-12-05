@@ -1,14 +1,14 @@
 {
-  "name": "brest-api-key",
-  "version": "0.0.2",
-  "description": "bREST API key authorisation extension.",
-  "repository": {
-    "type": "git",
-    "url": " https://github.com/MaximTovstashev/brest-api-key.git"
-  },
-  "main": "index.js",
-  "dependencies": {
-    "colors": "*",
-    "lodash": "*"
-  }
+    "name": "brest-api-key",
+    "version": "0.0.3",
+    "description": "bREST API key authorisation extension.",
+    "repository": {
+        "type": "git",
+        "url": " https://github.com/MaximTovstashev/brest-api-key.git"
+    },
+    "main": "index.js",
+    "dependencies": {
+        "colors": "*",
+        "lodash": "*"
+    }
 }
