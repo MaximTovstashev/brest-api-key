@@ -1,7 +1,7 @@
 var _ = require('lodash'),
     colors = require('colors'),
     crypto = require('crypto'),
-	md5 = require('md5'),
+    md5 = require('md5'),
     url = require('url'),
     util = require('util');
 
@@ -23,10 +23,11 @@ function checkNonceStub(nonce, callback) {
     callback(null, true);
 }
 
-var BrestAPIkey =
-{
-    init: function(brest, callback){
-        BrestAPIkey.settings = brest.getSetting('api_key', {enabled: true});
+var BrestAPIkey = {
+    init: function(brest, callback) {
+        BrestAPIkey.settings = brest.getSetting('api_key', {
+            enabled: true
+        });
         if (BrestAPIkey.settings.keys && !_.isEmpty(BrestAPIkey.settings.keys)) {
             BrestAPIkey.keys = BrestAPIkey.settings.keys;
             BrestAPIkey.settings.headers = _.defaults(BrestAPIkey.settings.headers, headersDefaults);
@@ -43,53 +44,71 @@ var BrestAPIkey =
     },
 
     method: {
-        authenticate: function(method, req, callback){
+        authenticate: function(method, req, callback) {
             if (!BrestAPIkey.settings.enabled) return callback();
             //if (!req.headerss[BrestAPIkey.settings.headers_secret_key] && !req.headerss[BrestAPIkey.settings.headers_public_key]) return callback({error: "API credentials missing"});
             var headers = BrestAPIkey.settings.headers;
 
             if (!(req.headers[headers.scheme] || req.headers[headers.nonce] || req.headers[headers.timestamp] || req.headers[headers.credential] || req.headers[headers.signature])) {
-                return callback({error: "API key headers are missing"});
+                return callback({
+                    error: "API key headers are missing"
+                });
             }
 
-            BrestAPIkey.checkNonce(req.headers[headers.nonce], function(err, nonce_ok){
+            BrestAPIkey.checkNonce(req.headers[headers.nonce], function(err, nonce_ok) {
                 if (err) return callback(err);
                 if (nonce_ok) {
                     var timeDiff = Math.abs((new Date()) - req.headers[headers.timestamp]);
-                    if (timeDiff > ONE_HOUR || timeDiff < 0) return callback({error: 'Your client has failed to follow Shadow Proclamation Temporal Regulations'});
+                    if (timeDiff > ONE_HOUR || timeDiff < 0) return callback({
+                        error: 'Your client has failed to follow Shadow Proclamation Temporal Regulations'
+                    });
                     var ln = '|'; //Line feed code
                     var url_parts = url.parse(req.url, true);
-
                     var queryString = [];
-                    _.each(url_parts.query, function(value, key) {
+
+                    var url_parts_keys = (Object.keys(url_parts.query)).sort();
+                    _.each(url_parts_keys, function(key) {
+                        var value = url_parts.query[key];
                         if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
                             queryString.push(encodeURIComponent(key) + '=' + md5('' + value));
                         }
                     });
-                    _.each(req.body, function(value, key) {
-                        if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
-                            queryString.push(encodeURIComponent(key) + '=' + md5('' + value));
-                        }
-                    });
+
+                    if (!_.isUndefined(req.body)) {
+                        var body_parts_keys = (Object.keys(req.body)).sort();
+                        _.each(body_parts_keys, function(key) {
+                            var value = url_parts.query[key];
+                            if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
+                                queryString.push(encodeURIComponent(key) + '=' + md5('' + value));
+                            }
+                        });
+                    }
+
                     var canonicalQuery = queryString.join('&');
 
                     var authenticationScheme =
-                       req.headers[headers.scheme] + ln +
-                       req.headers[headers.nonce] + ln +
-                       req.headers[headers.timestamp] + ln +
-                       req.method + ln +
-                       url_parts.pathname + ln +
-                       canonicalQuery + ln;
-
+                        req.headers[headers.scheme] + ln +
+                        req.headers[headers.nonce] + ln +
+                        req.headers[headers.timestamp] + ln +
+                        req.method + ln +
+                        url_parts.pathname + ln +
+                        canonicalQuery + ln;
+                    console.log(authenticationScheme);
                     if (BrestAPIkey.keys[req.headers[headers.credential]]) {
-                       var signature = crypto.createHmac("sha256", BrestAPIkey.keys[req.headers[headers.credential]]).update(authenticationScheme).digest("hex");
+                        var signature = crypto.createHmac("sha256", BrestAPIkey.keys[req.headers[headers.credential]]).update(authenticationScheme).digest("hex");
                     } else {
-                       return callback({'error': 'Credentials not found'});
+                        return callback({
+                            'error': 'Credentials not found'
+                        });
                     }
 
-                    if (req.headers[headers.signature] != signature) return callback({error: 'Incorrect request signature'});
+                    if (req.headers[headers.signature] != signature) return callback({
+                        error: 'Incorrect request signature'
+                    });
                     callback();
-                } else callback({'error': 'Nonce check failed'});
+                } else callback({
+                    'error': 'Nonce check failed'
+                });
             });
         }
     }
