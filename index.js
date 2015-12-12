@@ -77,7 +77,7 @@ var BrestAPIkey = {
                     if (!_.isUndefined(req.body)) {
                         var body_parts_keys = (Object.keys(req.body)).sort();
                         _.each(body_parts_keys, function(key) {
-                            var value = url_parts.query[key];
+                            var value = req.body[key];
                             if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
                                 queryString.push(encodeURIComponent(key) + '=' + md5('' + value));
                             }
@@ -93,7 +93,6 @@ var BrestAPIkey = {
                         req.method + ln +
                         url_parts.pathname + ln +
                         canonicalQuery + ln;
-                    console.log(authenticationScheme);
                     if (BrestAPIkey.keys[req.headers[headers.credential]]) {
                         var signature = crypto.createHmac("sha256", BrestAPIkey.keys[req.headers[headers.credential]]).update(authenticationScheme).digest("hex");
                     } else {
