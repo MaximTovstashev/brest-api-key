@@ -1,6 +1,6 @@
 {
     "name": "brest-api-key",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "bREST API key authorisation extension.",
     "repository": {
         "type": "git",
@@ -9,6 +9,7 @@
     "main": "index.js",
     "dependencies": {
         "colors": "*",
-        "lodash": "*"
+        "lodash": "*",
+        "md5": "*"
     }
 }

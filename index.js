@@ -1,6 +1,7 @@
 var _ = require('lodash'),
     colors = require('colors'),
     crypto = require('crypto'),
+	md5 = require('md5'),
     url = require('url'),
     util = require('util');
 
@@ -60,9 +61,14 @@ var BrestAPIkey =
                     var url_parts = url.parse(req.url, true);
 
                     var queryString = [];
-                    _.each(url_parts.query, function(value, key){
+                    _.each(url_parts.query, function(value, key) {
                         if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
-                            queryString.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                            queryString.push(encodeURIComponent(key) + '=' + md5('' + value));
+                        }
+                    });
+                    _.each(req.body, function(value, key) {
+                        if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
+                            queryString.push(encodeURIComponent(key) + '=' + md5('' + value));
                         }
                     });
                     var canonicalQuery = queryString.join('&');
