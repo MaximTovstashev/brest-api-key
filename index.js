@@ -55,7 +55,7 @@ var BrestAPIkey =
             BrestAPIkey.checkNonce(req.headers[headers.nonce], function(err, nonce_ok){
                 if (err) return callback(err);
                 if (nonce_ok) {
-                    var timeDiff = (new Date()) - req.headers[headers.timestamp];
+                    var timeDiff = Math.abs((new Date()) - req.headers[headers.timestamp]);
                     if (timeDiff > ONE_HOUR || timeDiff < 0) return callback({error: 'Your client has failed to follow Shadow Proclamation Temporal Regulations'});
                     var ln = '|'; //Line feed code
                     var url_parts = url.parse(req.url, true);
